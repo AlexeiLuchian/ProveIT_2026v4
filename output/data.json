@@ -1,45 +1,43 @@
 {
-    "timestamp": 1775351290.148,
+    "timestamp": 1775353573.85,
     "decisions": {
         "speed_decision": "maintain",
         "lane_decision": "keep_lane",
         "brake_decision": "light",
         "risk_level": "medium"
     },
+    "lane_geometry": {
+        "left_lane": -371,
+        "right_lane": 445,
+        "lane_width": 816
+    },
     "objects": [
         {
             "label": "car",
             "pos_rel": [
-                -2.64,
-                4.0
+                -4.7,
+                8.62
             ]
         },
         {
             "label": "car",
             "pos_rel": [
-                1.92,
-                6.43
+                -7.13,
+                18.0
             ]
         },
         {
             "label": "car",
             "pos_rel": [
-                -4.45,
-                19.73
+                -1.85,
+                42.35
             ]
         },
         {
             "label": "car",
             "pos_rel": [
-                -1.39,
-                19.73
-            ]
-        },
-        {
-            "label": "car",
-            "pos_rel": [
-                0.42,
-                19.2
+                1.4,
+                20.0
             ]
         }
     ]

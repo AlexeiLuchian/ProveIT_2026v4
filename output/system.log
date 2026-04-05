@@ -32,3 +32,101 @@
 [1775351280.1] RISK: high | BRAKE: strong | SPEED: decrease
 [1775351285.1] RISK: medium | BRAKE: light | SPEED: maintain
 [1775351290.1] RISK: medium | BRAKE: light | SPEED: maintain
+[1775348045.4] RISK: high | BRAKE: strong | F_brake: 27.02 m/s^2
+[1775351655.8] RISK: medium | BRAKE: light | F_brake: 22.86 m/s^2
+[1775351660.7] RISK: high | BRAKE: strong | F_brake: 74.59 m/s^2
+[1775351665.7] RISK: medium | BRAKE: light | F_brake: 52.06 m/s^2
+[1775351670.7] RISK: high | BRAKE: strong | F_brake: 13.29 m/s^2
+[1775351675.8] RISK: medium | BRAKE: light | F_brake: 12.49 m/s^2
+[1775351680.7] RISK: medium | BRAKE: light | F_brake: 19.12 m/s^2
+[1775351685.7] RISK: high | BRAKE: strong | F_brake: 34.66 m/s^2
+[1775351690.7] RISK: high | BRAKE: strong | F_brake: 57.98 m/s^2
+[1775351695.8] RISK: medium | BRAKE: light | F_brake: 73.31 m/s^2
+[1775351700.8] RISK: medium | BRAKE: light | F_brake: 80.22 m/s^2
+[1775351705.8] RISK: high | BRAKE: strong | F_brake: 80.22 m/s^2
+[1775351710.8] RISK: high | BRAKE: strong | F_brake: 79.72 m/s^2
+[1775351715.8] RISK: medium | BRAKE: light | F_brake: 79.72 m/s^2
+[1775351720.8] RISK: medium | BRAKE: light | F_brake: 79.72 m/s^2
+[1775351725.8] RISK: medium | BRAKE: light | F_brake: 79.72 m/s^2
+[1775348331.6] RISK: high | BRAKE: strong
+[1775348332.1] RISK: high | BRAKE: strong
+[1775348332.6] RISK: medium | BRAKE: light
+[1775348333.2] RISK: medium | BRAKE: light
+[1775348333.7] RISK: medium | BRAKE: light
+[1775348334.2] RISK: high | BRAKE: strong
+[1775348334.8] RISK: high | BRAKE: strong
+[1775348335.3] RISK: high | BRAKE: strong
+[1775348335.8] RISK: medium | BRAKE: light
+[1775351946.2] RISK: medium | BRAKE: light
+[1775351951.3] RISK: medium | BRAKE: light
+[1775351956.3] RISK: high | BRAKE: strong
+[1775351961.3] RISK: medium | BRAKE: light
+[1775351966.3] RISK: medium | BRAKE: light
+[1775348707.2] RISK: high | BRAKE: strong
+[1775348707.7] RISK: high | BRAKE: strong
+[1775348708.2] RISK: medium | BRAKE: light
+[1775348708.8] RISK: medium | BRAKE: light
+[1775348709.3] RISK: medium | BRAKE: light
+[1775348709.8] RISK: medium | BRAKE: light
+[1775348710.3] RISK: medium | BRAKE: light
+[1775348710.9] RISK: medium | BRAKE: light
+[1775348711.4] RISK: medium | BRAKE: light
+[1775352321.8] RISK: medium | BRAKE: light
+[1775352326.8] RISK: medium | BRAKE: light
+[1775352331.9] RISK: high | BRAKE: strong
+[1775348970.8896801] RISK: high | BRAKE: strong
+[1775348971.4200163] RISK: high | BRAKE: strong
+[1775348971.936333] RISK: medium | BRAKE: light
+[1775352582.2746615] RISK: medium | BRAKE: light
+[1775352587.2931433] RISK: medium | BRAKE: light
+[1775352592.3008091] RISK: high | BRAKE: strong
+[1775349094.43] RISK: high | BRAKE: strong
+[1775349094.94] RISK: high | BRAKE: strong
+[1775349095.47] RISK: medium | BRAKE: light
+[1775349096.0] RISK: high | BRAKE: strong
+[1775349096.51] RISK: high | BRAKE: strong
+[1775349097.01] RISK: high | BRAKE: strong
+[1775352707.48] RISK: high | BRAKE: strong
+[1775352712.51] RISK: high | BRAKE: strong
+[1775352717.51] RISK: medium | BRAKE: light
+[1775352722.51] RISK: high | BRAKE: strong
+[1775352727.53] RISK: medium | BRAKE: light
+[1775352732.51] RISK: medium | BRAKE: light
+[1775352737.54] RISK: medium | BRAKE: light
+[1775349515.97] RISK: high | BRAKE: strong
+[1775349600.47] RISK: high | BRAKE: strong
+[1775349601.01] RISK: high | BRAKE: strong
+[1775349601.53] RISK: medium | BRAKE: light
+[1775349602.07] RISK: medium | BRAKE: light
+[1775349602.57] RISK: medium | BRAKE: light
+[1775349603.08] RISK: high | BRAKE: strong
+[1775353213.24] RISK: medium | BRAKE: light
+[1775353218.26] RISK: medium | BRAKE: light
+[1775353223.27] RISK: high | BRAKE: strong
+[1775353228.29] RISK: medium | BRAKE: light
+[1775353233.26] RISK: medium | BRAKE: light
+[1775353238.26] RISK: high | BRAKE: strong
+[1775349862.31] RISK: high | BRAKE: strong
+[1775349862.83] RISK: high | BRAKE: strong
+[1775349863.33] RISK: high | BRAKE: strong
+[1775353473.65] RISK: medium | BRAKE: light
+[1775353478.69] RISK: high | BRAKE: strong
+[1775353483.7] RISK: high | BRAKE: strong
+[1775353488.68] RISK: high | BRAKE: strong
+[1775353493.68] RISK: medium | BRAKE: light
+[1775353498.69] RISK: high | BRAKE: strong
+[1775353503.72] RISK: medium | BRAKE: light
+[1775353508.75] RISK: medium | BRAKE: light
+[1775353513.73] RISK: high | BRAKE: strong
+[1775353518.75] RISK: medium | BRAKE: light
+[1775353523.8] RISK: medium | BRAKE: light
+[1775353528.77] RISK: medium | BRAKE: light
+[1775353533.76] RISK: medium | BRAKE: light
+[1775353538.79] RISK: medium | BRAKE: light
+[1775353543.76] RISK: medium | BRAKE: light
+[1775353548.79] RISK: high | BRAKE: strong
+[1775353553.79] RISK: high | BRAKE: strong
+[1775353558.77] RISK: medium | BRAKE: light
+[1775353563.82] RISK: high | BRAKE: strong
+[1775353568.84] RISK: medium | BRAKE: light
+[1775353573.85] RISK: medium | BRAKE: light
