@@ -19,4 +19,5 @@ yolov8n.pt
 .claude/
 .DS_Store
 *.swp
-video_test_1.mp4
+# Video files (too large for GitHub, keep locally)
+*.mp4
