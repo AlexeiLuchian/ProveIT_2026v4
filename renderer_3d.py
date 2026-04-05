@@ -30,9 +30,14 @@ def main_3d():
     pygame.init(); display = (1024, 768)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     pygame.display.set_caption("Magna 3D - Full Logic Render")
-    
+
     setup_perspective(60, (display[0]/display[1]), 0.1, 200.0)
-    
+
+    brake_trails = []    # urme de frânare pe asfalt (+5p bonus)
+    skid_offset  = 0.0   # derapaj lateral la frânare puternică (+5p bonus)
+    skid_velocity = 0.0  # impuls unic la momentul frânării
+    prev_brake   = "none"
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: return
@@ -87,15 +92,41 @@ def main_3d():
                         l_c = (1,0,0) if tc == "ROSU" else (0,1,0) if tc == "VERDE" else (1,1,0)
                         draw_styled_cube(rx, 2.0, -rz, 0.3, 1.0, 0.3, (0.4, 0.4, 0.4)) # Corp gri
                         draw_styled_cube(rx, 2.8, -rz-0.1, 0.2, 0.2, 0.2, l_c) # Lumina corectă
-                    elif 'sign' in lbl:
-                        draw_styled_cube(rx, 1.5, -rz, 0.6, 0.6, 0.1, (1, 1, 1))
+                    elif lbl == 'stop sign':
+                        draw_styled_cube(rx, 1.0, -rz, 0.4, 0.4, 0.05, (0.9, 0.1, 0.1))
+                    elif lbl == 'person':
+                        draw_styled_cube(rx, 0.8, -rz, 0.3, 1.0, 0.3, (0.4, 0.8, 1.0))
 
             except: pass
 
-        # EGO Car (Colorat după frână)
+        # ── URME DE FRÂNARE pe asfalt (+5p bonus) ──────────────────────────
         brake = decisions.get("brake_decision", "none")
+        if brake == "strong":
+            brake_trails.append(skid_offset)
+        if len(brake_trails) > 40:
+            brake_trails.pop(0)
+
+        glColor3f(0.04, 0.04, 0.04)
+        for i, sx in enumerate(brake_trails):
+            z_pos = float(i) * 0.3
+            for track_x in [sx - 0.35, sx + 0.35]:
+                glBegin(GL_QUADS)
+                glVertex3f(track_x-0.08, 0.01, z_pos);     glVertex3f(track_x+0.08, 0.01, z_pos)
+                glVertex3f(track_x+0.08, 0.01, z_pos+0.2); glVertex3f(track_x-0.08, 0.01, z_pos+0.2)
+                glEnd()
+
+        # ── EGO — culoare + derapaj (+5p bonus) ────────────────────────────
+        # Impuls unic doar la tranziția none/light → strong, nu în fiecare frame
+        if brake == "strong" and prev_brake != "strong":
+            skid_velocity = 0.35
+        prev_brake = brake
+
+        skid_offset   += skid_velocity
+        skid_velocity *= 0.65   # amortizare rapidă
+        skid_offset   *= 0.80   # revenire spre centru
+
         ego_color = (1.0, 0.1, 0.1) if brake == "strong" else (1.0, 0.7, 0.0) if brake == "light" else (0.0, 1.0, 0.4)
-        draw_styled_cube(0, 0.4, 0, 1.1, 0.4, 2.2, ego_color)
+        draw_styled_cube(skid_offset, 0.4, 0, 1.1, 0.4, 2.2, ego_color)
 
         # TEXT HUD (Decizii 3D)
         speed_t = decisions.get("speed_decision","?").upper()
@@ -105,7 +136,7 @@ def main_3d():
         # Coordonatele Y pleacă de jos în sus în glWindowPos2d
         render_text(f"BRAKE: {brake_t}", 20, 720, (255,80,80) if brake_t!="NONE" else (80,255,80))
         render_text(f"SPEED: {speed_t}", 20, 690, (255,255,80))
-        render_text(f"LANE:  {lane_t}", 20, 660, (80,200,255))
+        render_text(f"LANE:  {lane_t}",  20, 660, (80,200,255))
 
         pygame.display.flip(); pygame.time.Clock().tick(30)
 

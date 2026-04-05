@@ -1,106 +1,47 @@
 {
+    "timestamp": 1775364488.106,
     "decisions": {
-        "brake_decision": "light",
-        "speed_decision": "maintain",
-        "risk_level": "medium",
-        "lane_decision": "change_lane"
+        "brake_decision": "none",
+        "speed_decision": "increase",
+        "risk_level": "low",
+        "lane_decision": "keep_lane"
     },
     "lane_geometry": {
-        "center_line": -46,
-        "right_line": 381
+        "center_line": -275,
+        "right_line": 268
     },
     "objects": [
         {
             "label": "car",
-            "box": [
-                777,
-                523,
-                943,
-                601
-            ],
             "pos_rel": [
-                2.39,
-                8.67
-            ]
+                3.15,
+                7.96
+            ],
+            "speed_kmh": 0.0
         },
         {
             "label": "car",
-            "box": [
-                435,
-                534,
-                498,
-                573
-            ],
             "pos_rel": [
-                -4.96,
-                22.86
-            ]
+                2.25,
+                17.14
+            ],
+            "speed_kmh": 0.0
         },
         {
             "label": "car",
-            "box": [
-                1172,
-                527,
-                1279,
-                702
-            ],
             "pos_rel": [
-                9.85,
-                13.46
-            ]
+                -4.75,
+                7.06
+            ],
+            "speed_kmh": 0.0
         },
         {
             "label": "car",
-            "box": [
-                623,
-                535,
-                670,
-                566
-            ],
             "pos_rel": [
-                0.25,
-                30.64
-            ]
-        },
-        {
-            "label": "traffic light",
-            "box": [
-                34,
-                442,
-                60,
-                483
+                -6.68,
+                13.71
             ],
-            "pos_rel": [
-                -41.05,
-                55.38
-            ],
-            "tl_color": "VERDE"
-        },
-        {
-            "label": "car",
-            "box": [
-                560,
-                534,
-                597,
-                563
-            ],
-            "pos_rel": [
-                -2.99,
-                38.92
-            ]
-        },
-        {
-            "label": "car",
-            "box": [
-                928,
-                513,
-                977,
-                545
-            ],
-            "pos_rel": [
-                11.48,
-                29.39
-            ]
+            "speed_kmh": 0.0
         }
     ]
 }

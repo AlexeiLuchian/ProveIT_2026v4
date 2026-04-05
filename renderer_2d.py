@@ -9,6 +9,10 @@ def main_renderer():
     EGO_X, EGO_Y, SCALE = 400, 700, 15
     
     while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+
         screen.fill((20, 20, 25))
         if os.path.exists("output/data.json"):
             try:
@@ -55,6 +59,7 @@ def main_renderer():
                 # 6. EGO Car Reactiv
                 ego_col = (255,50,50) if brake_d=="strong" else (255,180,0) if brake_d=="light" else (0,255,100)
                 pygame.draw.rect(screen, ego_col, (EGO_X-15, EGO_Y-30, 30, 60), border_radius=4)
+                screen.blit(font.render("EGO", True, (255,255,255)), (EGO_X-15, EGO_Y+35))
 
             except: pass
 
