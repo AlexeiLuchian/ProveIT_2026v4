@@ -1,0 +1,11 @@
+[project]
+name = "proveit-2026v4"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "opencv-contrib-python>=4.13.0.92",
+    "pygame>=2.6.1",
+    "ultralytics>=8.4.33",
+]

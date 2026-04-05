@@ -1,0 +1,46 @@
+{
+    "timestamp": 1775351290.148,
+    "decisions": {
+        "speed_decision": "maintain",
+        "lane_decision": "keep_lane",
+        "brake_decision": "light",
+        "risk_level": "medium"
+    },
+    "objects": [
+        {
+            "label": "car",
+            "pos_rel": [
+                -2.64,
+                4.0
+            ]
+        },
+        {
+            "label": "car",
+            "pos_rel": [
+                1.92,
+                6.43
+            ]
+        },
+        {
+            "label": "car",
+            "pos_rel": [
+                -4.45,
+                19.73
+            ]
+        },
+        {
+            "label": "car",
+            "pos_rel": [
+                -1.39,
+                19.73
+            ]
+        },
+        {
+            "label": "car",
+            "pos_rel": [
+                0.42,
+                19.2
+            ]
+        }
+    ]
+}
