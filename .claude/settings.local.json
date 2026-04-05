@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(js|jsx|ts|tsx|json\\)$\")",
+      "Bash(xargs grep:*)",
+      "Bash(find . -maxdepth 1 -type f -name \"*.py\" -exec grep -n \"pygame\\\\|matplotlib\\\\|turtle\\\\|visual\\\\|draw\\\\|render\" {} +)",
+      "Bash(grep -n \"class\\\\|def \" *.py)"
+    ]
+  }
+}

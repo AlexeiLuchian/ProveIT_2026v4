@@ -1,0 +1,1 @@
+{"decisions": {"speed_decision": "maintain", "lane_decision": "keep_lane", "brake_decision": "light", "risk_level": "medium"}, "lane_geometry": [-328, 250, 669, 782], "objects": [{"label": "car", "pos_rel": [1.48, 19.2]}, {"label": "car", "pos_rel": [-1.52, 41.14]}, {"label": "car", "pos_rel": [1.12, 60.0]}]}
