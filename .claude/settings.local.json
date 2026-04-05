@@ -7,7 +7,8 @@
       "Bash(grep -n \"class\\\\|def \" *.py)",
       "Bash(python3 -c ':*)",
       "Bash(python3:*)",
-      "Bash(wsl:*)"
+      "Bash(wsl:*)",
+      "WebSearch"
     ]
   }
 }

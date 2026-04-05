@@ -1,5 +1,5 @@
 {
-    "timestamp": 1775364488.106,
+    "timestamp": 1775367011.987,
     "decisions": {
         "brake_decision": "none",
         "speed_decision": "increase",
@@ -7,39 +7,15 @@
         "lane_decision": "keep_lane"
     },
     "lane_geometry": {
-        "center_line": -275,
-        "right_line": 268
+        "center_line": -517,
+        "right_line": 192
     },
     "objects": [
         {
             "label": "car",
             "pos_rel": [
-                3.15,
-                7.96
-            ],
-            "speed_kmh": 0.0
-        },
-        {
-            "label": "car",
-            "pos_rel": [
-                2.25,
-                17.14
-            ],
-            "speed_kmh": 0.0
-        },
-        {
-            "label": "car",
-            "pos_rel": [
-                -4.75,
-                7.06
-            ],
-            "speed_kmh": 0.0
-        },
-        {
-            "label": "car",
-            "pos_rel": [
-                -6.68,
-                13.71
+                -4.08,
+                10.43
             ],
             "speed_kmh": 0.0
         }
