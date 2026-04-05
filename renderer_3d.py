@@ -1,129 +1,112 @@
-import pygame
+import pygame, json, os, math
 from pygame.locals import *
 from OpenGL.GL import *
-import json
-import os
-import math
 
 def setup_perspective(fov, aspect, near, far):
     f = 1.0 / math.tan(math.radians(fov) / 2.0)
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    top = near * math.tan(math.radians(fov) / 2.0)
-    right = top * aspect
-    glFrustum(-right, right, -top, top, near, far)
-    glMatrixMode(GL_MODELVIEW)
+    glMatrixMode(GL_PROJECTION); glLoadIdentity()
+    top = near * math.tan(math.radians(fov) / 2.0); right = top * aspect
+    glFrustum(-right, right, -top, top, near, far); glMatrixMode(GL_MODELVIEW)
 
-def draw_cube(x, y, z, w, h, d, color):
+def draw_styled_cube(x, y, z, w, h, d, color):
     glPushMatrix()
-    glTranslatef(x, y, z)
-    glScalef(w, h, d)
-    glColor3f(*color)
-    # Cub standard 1x1x1 unități
-    vertices = [
-        [1, 1, -1], [1, -1, -1], [-1, -1, -1], [-1, 1, -1],
-        [1, 1, 1], [1, -1, 1], [-1, -1, 1], [-1, 1, 1]
-    ]
+    glTranslatef(x, y, z); glScalef(w, h, d); glColor3f(*color)
+    vertices = [[1,1,-1],[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,1],[1,-1,1],[-1,-1,1],[-1,1,1]]
     faces = [(0,1,2,3), (3,2,6,7), (7,6,5,4), (4,5,1,0), (1,5,6,2), (4,0,3,7)]
     glBegin(GL_QUADS)
-    for face in faces:
-        for vertex in face:
-            glVertex3fv(vertices[vertex])
-    glEnd()
-    glPopMatrix()
+    for f in faces: 
+        for v in f: glVertex3fv(vertices[v])
+    glEnd(); glPopMatrix()
+
+def render_text(text, x, y, color):
+    """Printează HUD-ul 2D peste scena 3D OpenGL"""
+    font = pygame.font.SysFont("Arial", 22, bold=True)
+    text_surf = font.render(text, True, color)
+    text_data = pygame.image.tostring(text_surf, "RGBA", True)
+    glWindowPos2d(x, y)
+    glDrawPixels(text_surf.get_width(), text_surf.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
 
 def main_3d():
-    pygame.init()
-    display = (1024, 768)
+    pygame.init(); display = (1024, 768)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-    pygame.display.set_caption("Magna 3D - Proiectie Corectata")
-
+    pygame.display.set_caption("Magna 3D - Full Logic Render")
+    
     setup_perspective(60, (display[0]/display[1]), 0.1, 200.0)
     
-    clock = pygame.time.Clock()
-    last_valid_data = {}
-
     while True:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glEnable(GL_DEPTH_TEST)
+            if event.type == pygame.QUIT: return
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); glEnable(GL_DEPTH_TEST)
         glLoadIdentity()
-
-        # --- CAMERA (Ancorată în spatele mașinii EGO) ---
-        # Ne ridicăm la 5 metri înălțime și stăm la 10 metri în spatele mașinii (Z pozitiv)
-        # Privim spre punctul (0, 0, -20) care este în fața mașinii
+        
+        # CAMERA: Aceea pe care o iubeai (din spate, unghi perfect)
         glTranslatef(0.0, -5.0, -15.0) 
-        glRotatef(20, 1, 0, 0) # Înclinăm camera să vedem drumul
+        glRotatef(20, 1, 0, 0) 
 
+        decisions = {}
         if os.path.exists("output/data.json"):
             try:
-                with open("output/data.json", "r") as f:
-                    content = f.read()
-                    if content.strip():
-                        last_valid_data = json.loads(content)
+                with open("output/data.json", "r") as f: 
+                    data = json.load(f)
+                    decisions = data.get("decisions", {})
+                
+                # Asfalt
+                glBegin(GL_QUADS); glColor3f(0.12, 0.12, 0.14); glVertex3f(-25,0,10); glVertex3f(25,0,10); glVertex3f(25,0,-150); glVertex3f(-25,0,-150); glEnd()
+                
+                lanes = data.get("lane_geometry", {})
+                l_m = (lanes.get("center_line", -250) * 3.5 / 450)
+                r_m = (lanes.get("right_line", 250) * 3.5 / 450)
+                
+                # Linia galbenă DUBLE
+                glColor3f(1.0, 0.8, 0.0)
+                for offset in [-0.12, 0.12]:
+                    glBegin(GL_QUADS)
+                    glVertex3f(l_m+offset-0.05, 0.02, 10);  glVertex3f(l_m+offset+0.05, 0.02, 10)
+                    glVertex3f(l_m+offset+0.05, 0.02, -150); glVertex3f(l_m+offset-0.05, 0.02, -150)
+                    glEnd()
+
+                # Linia albă ÎNTRERUPTĂ
+                glColor3f(1.0, 1.0, 1.0)
+                z = 10
+                while z > -150:
+                    glBegin(GL_QUADS)
+                    glVertex3f(r_m-0.08, 0.02, z);      glVertex3f(r_m+0.08, 0.02, z)
+                    glVertex3f(r_m+0.08, 0.02, z-3.0);  glVertex3f(r_m-0.08, 0.02, z-3.0)
+                    glEnd()
+                    z -= 9.0
+
+                # Obiecte
+                for o in data.get("objects", []):
+                    rx, rz, lbl = o["pos_rel"][0], o["pos_rel"][1], o["label"]
+                    if lbl in ['car', 'bus', 'truck']:
+                        c = (0.0, 0.4, 0.8)
+                        w, h, d = (1.1, 0.7, 2.0) if lbl == 'car' else (1.4, 1.4, 4.5)
+                        draw_styled_cube(rx, h/2, -rz, w, h/2, d, c)
+                    elif lbl == 'traffic light':
+                        tc = o.get("tl_color", "")
+                        l_c = (1,0,0) if tc == "ROSU" else (0,1,0) if tc == "VERDE" else (1,1,0)
+                        draw_styled_cube(rx, 2.0, -rz, 0.3, 1.0, 0.3, (0.4, 0.4, 0.4)) # Corp gri
+                        draw_styled_cube(rx, 2.8, -rz-0.1, 0.2, 0.2, 0.2, l_c) # Lumina corectă
+                    elif 'sign' in lbl:
+                        draw_styled_cube(rx, 1.5, -rz, 0.6, 0.6, 0.1, (1, 1, 1))
+
             except: pass
 
-        data = last_valid_data
+        # EGO Car (Colorat după frână)
+        brake = decisions.get("brake_decision", "none")
+        ego_color = (1.0, 0.1, 0.1) if brake == "strong" else (1.0, 0.7, 0.0) if brake == "light" else (0.0, 1.0, 0.4)
+        draw_styled_cube(0, 0.4, 0, 1.1, 0.4, 2.2, ego_color)
 
-        # 1. DESENĂM ASFALTUL (Până la 100 metri în față)
-        glBegin(GL_QUADS)
-        glColor3f(0.1, 0.1, 0.12)
-        glVertex3f(-20, 0, 10)    # Spatele mașinii
-        glVertex3f(20, 0, 10)
-        glVertex3f(20, 0, -150)  # Depărtare (Z negativ în OpenGL)
-        glVertex3f(-20, 0, -150)
-        glEnd()
+        # TEXT HUD (Decizii 3D)
+        speed_t = decisions.get("speed_decision","?").upper()
+        lane_t  = decisions.get("lane_decision","?").upper()
+        brake_t = decisions.get("brake_decision","?").upper()
+        
+        # Coordonatele Y pleacă de jos în sus în glWindowPos2d
+        render_text(f"BRAKE: {brake_t}", 20, 720, (255,80,80) if brake_t!="NONE" else (80,255,80))
+        render_text(f"SPEED: {speed_t}", 20, 690, (255,255,80))
+        render_text(f"LANE:  {lane_t}", 20, 660, (80,200,255))
 
-        # 2. MAȘINA EGO (Poziția 0,0,0)
-        # O desenăm un pic mai sus (y=0.6) ca să nu intre în asfalt
-        draw_cube(0, 0.6, 0, 1.1, 0.6, 2.2, (0.0, 1.0, 0.2))
+        pygame.display.flip(); pygame.time.Clock().tick(30)
 
-        if data:
-            lane_geom = data.get("lane_geometry", {})
-            # Folosim metri reali (3.5m bandă)
-            l_x, r_x = -1.75, 1.75
-
-            # Linie Centru (Galbenă)
-            glColor3f(1.0, 0.8, 0.0)
-            glBegin(GL_QUADS)
-            glVertex3f(l_x-0.1, 0.05, 10); glVertex3f(l_x+0.1, 0.05, 10)
-            glVertex3f(l_x+0.1, 0.05, -150); glVertex3f(l_x-0.1, 0.05, -150)
-            glEnd()
-
-            # Linie Dreapta (Albă întreruptă)
-            glColor3f(1.0, 1.0, 1.0)
-            for z in range(10, -150, -10): # Mergem spre înainte (Z negativ)
-                glBegin(GL_QUADS)
-                glVertex3f(r_x-0.1, 0.05, z); glVertex3f(r_x+0.1, 0.05, z)
-                glVertex3f(r_x+0.1, 0.05, z-5); glVertex3f(r_x-0.1, 0.05, z-5)
-                glEnd()
-
-            # 3. RANDARE OBIECTE DIN JSON
-            for obj in data.get("objects", []):
-                rx, rz = obj["pos_rel"]
-                lbl = obj["label"]
-                
-                # --- FIX CRITIC PENTRU PRECIZIE ---
-                # În JSON rz este distanța în față (ex: 15 metri).
-                # În OpenGL, înainte = Z negativ. Deci desenăm la -rz.
-                draw_z = -rz 
-
-                if lbl in ['car', 'truck', 'bus']: col = (0.2, 0.4, 1.0)
-                elif lbl == 'person': col = (0.0, 1.0, 1.0)
-                elif lbl == 'traffic light':
-                    tc = obj.get("tl_color", "")
-                    col = (1,0,0) if tc=="ROSU" else ((0,1,0) if tc=="VERDE" else (0.9,0.9,0))
-                else: col = (1, 0.2, 0.2)
-
-                # Desenăm cubul la coordonatele transformate
-                draw_cube(rx, 0.8, draw_z, 1.0, 0.8, 1.8, col)
-
-        pygame.display.flip()
-        clock.tick(30)
-
-if __name__ == '__main__':
-    main_3d()
+if __name__ == '__main__': main_3d()

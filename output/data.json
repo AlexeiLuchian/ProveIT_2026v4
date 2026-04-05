@@ -1,20 +1,104 @@
 {
-    "timestamp": 1775359310.473,
     "decisions": {
-        "speed_decision": "maintain",
-        "lane_decision": "keep_lane",
         "brake_decision": "light",
-        "risk_level": "medium"
+        "speed_decision": "maintain",
+        "risk_level": "medium",
+        "lane_decision": "change_lane"
     },
     "lane_geometry": {
-        "center_line": -357,
-        "right_line": 61
+        "center_line": -46,
+        "right_line": 381
     },
     "objects": [
         {
             "label": "car",
+            "box": [
+                777,
+                523,
+                943,
+                601
+            ],
             "pos_rel": [
-                3.54,
+                2.39,
+                8.67
+            ]
+        },
+        {
+            "label": "car",
+            "box": [
+                435,
+                534,
+                498,
+                573
+            ],
+            "pos_rel": [
+                -4.96,
+                22.86
+            ]
+        },
+        {
+            "label": "car",
+            "box": [
+                1172,
+                527,
+                1279,
+                702
+            ],
+            "pos_rel": [
+                9.85,
+                13.46
+            ]
+        },
+        {
+            "label": "car",
+            "box": [
+                623,
+                535,
+                670,
+                566
+            ],
+            "pos_rel": [
+                0.25,
+                30.64
+            ]
+        },
+        {
+            "label": "traffic light",
+            "box": [
+                34,
+                442,
+                60,
+                483
+            ],
+            "pos_rel": [
+                -41.05,
+                55.38
+            ],
+            "tl_color": "VERDE"
+        },
+        {
+            "label": "car",
+            "box": [
+                560,
+                534,
+                597,
+                563
+            ],
+            "pos_rel": [
+                -2.99,
+                38.92
+            ]
+        },
+        {
+            "label": "car",
+            "box": [
+                928,
+                513,
+                977,
+                545
+            ],
+            "pos_rel": [
+                11.48,
                 29.39
             ]
         }
