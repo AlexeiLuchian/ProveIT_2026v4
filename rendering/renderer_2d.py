@@ -1,15 +1,17 @@
-import pygame, json, os
+import pygame, json, os, pathlib
+
+DATA_JSON = pathlib.Path(__file__).parent.parent / "output" / "data.json"
 
 # Culori RGB per clasă (Pygame folosește RGB, nu BGR)
 OBJ_COLORS = {
-    "car":           ( 60, 150, 255),   # albastru deschis
-    "truck":         (255, 130,  60),   # portocaliu
-    "bus":           (200,  60, 200),   # mov
-    "person":        (  0, 255, 255),   # cyan
-    "bicycle":       ( 60, 220,  60),   # verde lime
-    "motorcycle":    (255, 200,   0),   # galben
-    "stop sign":     (255,  50,  50),   # roșu
-    "traffic light": (160, 160, 160),   # gri (default)
+    "car":           ( 60, 150, 255),
+    "truck":         (255, 130,  60),
+    "bus":           (200,  60, 200),
+    "person":        (  0, 255, 255),
+    "bicycle":       ( 60, 220,  60),
+    "motorcycle":    (255, 200,   0),
+    "stop sign":     (255,  50,  50),
+    "traffic light": (160, 160, 160),
 }
 
 OBJ_LABELS = {
@@ -20,13 +22,13 @@ OBJ_LABELS = {
 
 # Dimensiuni vizuale per clasă (w, h) în pixeli pe radar
 OBJ_SIZES = {
-    "car":        (20, 40),
-    "truck":      (24, 55),
-    "bus":        (28, 65),
-    "person":     (10, 22),
-    "bicycle":    (10, 20),
-    "motorcycle": (12, 25),
-    "stop sign":  (14, 14),
+    "car":           (20, 40),
+    "truck":         (24, 55),
+    "bus":           (28, 65),
+    "person":        (10, 22),
+    "bicycle":       (10, 20),
+    "motorcycle":    (12, 25),
+    "stop sign":     (14, 14),
     "traffic light": (10, 22),
 }
 
@@ -35,10 +37,12 @@ def main_renderer():
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Magna 2D - Radar")
-    clock  = pygame.font.SysFont("Arial", 14, bold=True)  # font mic pentru labels
     font   = pygame.font.SysFont("Arial", 18, bold=True)
     font_s = pygame.font.SysFont("Arial", 13)
     EGO_X, EGO_Y, SCALE = 400, 700, 15
+    skid_offset   = 0.0
+    skid_velocity = 0.0
+    prev_brake    = "none"
 
     while True:
         for event in pygame.event.get():
@@ -47,9 +51,9 @@ def main_renderer():
 
         screen.fill((20, 20, 25))
 
-        if os.path.exists("output/data.json"):
+        if DATA_JSON.exists():
             try:
-                with open("output/data.json", "r") as f:
+                with open(DATA_JSON) as f:
                     data = json.load(f)
 
                 # ── Drum ────────────────────────────────────────────────────
@@ -86,11 +90,10 @@ def main_renderer():
 
                     color = OBJ_COLORS.get(lbl, (255, 255, 255))
 
-                    # Semafoarele: culoarea după starea ledului
                     if lbl == "traffic light":
                         tc = o.get("tl_color", "")
-                        if tc == "ROSU":   color = (255,  50,  50)
-                        elif tc == "VERDE": color = ( 50, 230,  50)
+                        if tc == "ROSU":     color = (255,  50,  50)
+                        elif tc == "VERDE":  color = ( 50, 230,  50)
                         elif tc == "GALBEN": color = (255, 220,   0)
 
                     sx, sy = OBJ_SIZES.get(lbl, (16, 32))
@@ -98,7 +101,6 @@ def main_renderer():
                     oy = EGO_Y - int(rz * SCALE) - sy
                     pygame.draw.rect(screen, color, (ox, oy, sx, sy), border_radius=3)
 
-                    # Label mic deasupra obiectului
                     tag = OBJ_LABELS.get(lbl, lbl[:5].upper())
                     screen.blit(font_s.render(tag, True, color), (ox, oy - 14))
 
@@ -115,10 +117,33 @@ def main_renderer():
                     True, (255, 80, 80) if brake_d != "none" else (80, 255, 80)
                 ), (20, 70))
 
-                # ── EGO reactiv ──────────────────────────────────────────────
+                # Suprafată drum + vizibilitate (jos)
+                road_info = data.get("road_info", {})
+                fog_info  = data.get("fog_info", {})
+                screen.blit(font_s.render(
+                    f"DRUM: {road_info.get('road_surface','?')} | mu={road_info.get('friction_mu','?')} | GRIP:{road_info.get('grip_class','?')}",
+                    True, (180, 255, 180)
+                ), (20, 750))
+                screen.blit(font_s.render(
+                    f"VIZ: {fog_info.get('visibility_m','?')}m  [{fog_info.get('fog_condition','?')}]",
+                    True, (180, 220, 255)
+                ), (20, 768))
+
+                # ── EGO reactiv + derapaj ────────────────────────────────────
+                if brake_d == "strong" and prev_brake != "strong":
+                    skid_velocity = 8.0
+                prev_brake = brake_d
+
+                skid_offset   += skid_velocity
+                skid_velocity *= 0.50
+                skid_offset   *= 0.70
+                if abs(skid_velocity) < 0.1: skid_velocity = 0.0
+                if abs(skid_offset)   < 0.5: skid_offset   = 0.0
+
                 ego_col = (255,50,50) if brake_d=="strong" else (255,180,0) if brake_d=="light" else (0,255,100)
-                pygame.draw.rect(screen, ego_col, (EGO_X-15, EGO_Y-30, 30, 60), border_radius=4)
-                screen.blit(font.render("EGO", True, (255, 255, 255)), (EGO_X-15, EGO_Y+35))
+                ex = EGO_X + int(skid_offset)
+                pygame.draw.rect(screen, ego_col, (ex-15, EGO_Y-30, 30, 60), border_radius=4)
+                screen.blit(font.render("EGO", True, (255, 255, 255)), (ex-15, EGO_Y+35))
 
             except Exception:
                 pass

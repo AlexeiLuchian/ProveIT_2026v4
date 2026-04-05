@@ -1,16 +1,17 @@
 import cv2
 import numpy as np
+import os
 from ultralytics import YOLO
 
 # Culori BGR per clasă — folosite și în main.py HUD
 LABEL_COLORS = {
-    "car":           (255, 150,  60),   # albastru deschis
-    "truck":         ( 60, 130, 255),   # portocaliu
-    "bus":           (200,  60, 200),   # mov
-    "person":        (255, 255,   0),   # cyan
-    "bicycle":       ( 60, 220,  60),   # verde lime
-    "motorcycle":    (  0, 200, 255),   # galben
-    "stop sign":     (  0,   0, 255),   # roșu
+    "car":           (255, 150,  60),
+    "truck":         ( 60, 130, 255),
+    "bus":           (200,  60, 200),
+    "person":        (255, 255,   0),
+    "bicycle":       ( 60, 220,  60),
+    "motorcycle":    (  0, 200, 255),
+    "stop sign":     (  0,   0, 255),
     "traffic light": (200, 200, 200),   # gri (se suprascrie cu culoarea activă)
 }
 
@@ -35,17 +36,19 @@ KNOWN_WIDTHS = {
 # 0=person, 1=bicycle, 2=car, 3=motorcycle, 5=bus, 7=truck, 9=traffic light, 11=stop sign
 YOLO_CLASSES = [0, 1, 2, 3, 5, 7, 9, 11]
 
+_MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "yolov8n.pt")
+
 
 class PerceptionSystem:
     def __init__(self):
-        self.model = YOLO('yolov8n.pt')
+        self.model = YOLO(_MODEL_PATH)
         self.FOCAL_LENGTH = 800
         self.last_center_line = -250
         self.last_right_line  = 250
         self.center_history   = []
         self.right_history    = []
 
-    # ─────────────────���────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────────────────
     # LANE DETECTION
     # ──────────────────────────────────────────────────────────────────────────
 
@@ -57,8 +60,8 @@ class PerceptionSystem:
         margin = 60
         min_px = 40
 
-        cur_x  = start_x
-        xs     = []
+        cur_x = start_x
+        xs    = []
 
         for win in range(n_win):
             y_lo = h - (win + 1) * win_h
@@ -97,7 +100,7 @@ class PerceptionSystem:
         dst    = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
         warped = cv2.warpPerspective(combined, cv2.getPerspectiveTransform(src, dst), (w, h))
 
-        # 4. Histogramă cu prag mai mic (400 față de 800 anterior)
+        # 4. Histogramă cu prag 400
         histogram = np.sum(warped[h//2:, :], axis=0)
 
         l_hist = histogram[int(w*0.10):int(w*0.48)]
@@ -109,7 +112,7 @@ class PerceptionSystem:
         left_x  = self._find_lane_x(warped, l_peak) if l_peak is not None else None
         right_x = self._find_lane_x(warped, r_peak) if r_peak is not None else None
 
-        # 6. Update valori + fallback cross-lane (dacă detectezi doar una, estimezi cealaltă)
+        # 6. Update + fallback cross-lane
         LANE_WIDTH_PX = 320
         if left_x is not None:
             self.last_center_line = int(left_x - w // 2)
@@ -162,6 +165,60 @@ class PerceptionSystem:
         return "INACTIV"
 
     # ──────────────────────────────────────────────────────────────────────────
+    # ROAD SURFACE + GRIP CLASS  (+10p + +5p bonus)
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _estimate_road_surface(self, frame):
+        """
+        Analizează ROI-ul drumului (partea inferioară a frame-ului) și clasifică
+        suprafața în funcție de luminozitate și variație de textură.
+
+        Returnează:
+            road_surface  : "asfalt_uscat" | "asfalt_umed" | "pietris"
+            friction_mu   : coeficient de frecare (μ) — folosit în formula de frânare
+            grip_class    : "A" | "B" | "C"
+        """
+        h, w = frame.shape[:2]
+        road_roi = frame[int(h * 0.75):h, int(w * 0.2):int(w * 0.8)]
+        gray_roi = cv2.cvtColor(road_roi, cv2.COLOR_BGR2GRAY)
+
+        mean_b = float(np.mean(gray_roi))
+        std_b  = float(np.std(gray_roi))
+
+        # Asfalt umed: reflexii specular → std mare + luminozitate medie-mare
+        # Pietriș: textură neuniformă → std mare + luminozitate scăzută
+        # Asfalt uscat: uniform → std mică
+        if std_b > 45 and mean_b > 100:
+            return {"road_surface": "asfalt_umed", "friction_mu": 0.45, "grip_class": "B"}
+        if std_b > 40 and mean_b < 80:
+            return {"road_surface": "pietris",     "friction_mu": 0.40, "grip_class": "C"}
+        return     {"road_surface": "asfalt_uscat","friction_mu": 0.70, "grip_class": "A"}
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # FOG / VISIBILITY ESTIMATION  (+10p + +10p bonus)
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _estimate_visibility(self, frame):
+        """
+        Estimează vizibilitatea analizând contrastul zonei de orizont.
+        Ceața reduce detaliile fine → contrast scăzut în banda de orizont.
+
+        Returnează:
+            visibility_m  : distanță estimată de vizibilitate (metri)
+            fog_condition : "ceata_densa" | "ceata_usoara" | "vizibilitate_buna"
+        """
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        h    = gray.shape[0]
+        horizon = gray[int(h * 0.25):int(h * 0.50), :]
+        contrast = float(np.std(horizon))
+
+        if contrast < 18:
+            return {"visibility_m": 40,  "fog_condition": "ceata_densa"}
+        if contrast < 30:
+            return {"visibility_m": 100, "fog_condition": "ceata_usoara"}
+        return     {"visibility_m": 500, "fog_condition": "vizibilitate_buna"}
+
+    # ──────────────────────────────────────────────────────────────────────────
     # MAIN ANALYZE
     # ──────────────────────────────────────────────────────────────────────────
 
@@ -171,8 +228,10 @@ class PerceptionSystem:
             classes=YOLO_CLASSES, agnostic_nms=True, verbose=False
         )[0]
 
-        detections = []
-        lanes      = self.get_lane_geometry(frame)
+        detections  = []
+        lanes       = self.get_lane_geometry(frame)
+        road_info   = self._estimate_road_surface(frame)
+        fog_info    = self._estimate_visibility(frame)
 
         for box in results.boxes:
             label = results.names[int(box.cls[0])]
@@ -210,4 +269,4 @@ class PerceptionSystem:
 
             detections.append(d_obj)
 
-        return detections, lanes
+        return detections, lanes, road_info, fog_info

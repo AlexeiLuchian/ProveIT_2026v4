@@ -1,17 +1,19 @@
-import pygame, json, os, math
+import pygame, json, os, math, pathlib
 from pygame.locals import *
 from OpenGL.GL import *
 
+DATA_JSON = pathlib.Path(__file__).parent.parent / "output" / "data.json"
+
 # Culori RGB OpenGL per clasă (valori 0.0–1.0)
 OBJ_COLORS_3D = {
-    "car":           (0.24, 0.59, 1.00),   # albastru
-    "truck":         (1.00, 0.51, 0.24),   # portocaliu
-    "bus":           (0.78, 0.24, 0.78),   # mov
-    "person":        (0.00, 1.00, 1.00),   # cyan
-    "bicycle":       (0.24, 0.86, 0.24),   # verde lime
-    "motorcycle":    (1.00, 0.78, 0.00),   # galben
-    "stop sign":     (0.90, 0.10, 0.10),   # roșu
-    "traffic light": (0.40, 0.40, 0.40),   # gri
+    "car":           (0.24, 0.59, 1.00),
+    "truck":         (1.00, 0.51, 0.24),
+    "bus":           (0.78, 0.24, 0.78),
+    "person":        (0.00, 1.00, 1.00),
+    "bicycle":       (0.24, 0.86, 0.24),
+    "motorcycle":    (1.00, 0.78, 0.00),
+    "stop sign":     (0.90, 0.10, 0.10),
+    "traffic light": (0.40, 0.40, 0.40),
 }
 
 # Dimensiuni (w, h, d) în metri pentru fiecare clasă
@@ -48,13 +50,6 @@ def draw_styled_cube(x, y, z, w, h, d, color):
     glPopMatrix()
 
 
-def render_text(text, x, y, color, font):
-    surf = font.render(text, True, color)
-    data = pygame.image.tostring(surf, "RGBA", True)
-    glWindowPos2d(x, y)
-    glDrawPixels(surf.get_width(), surf.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, data)
-
-
 def main_3d():
     pygame.init()
     display = (1024, 768)
@@ -81,9 +76,9 @@ def main_3d():
         glRotatef(20, 1, 0, 0)
 
         # Citire JSON
-        if os.path.exists("output/data.json"):
+        if DATA_JSON.exists():
             try:
-                with open("output/data.json", "r") as f:
+                with open(DATA_JSON, "r") as f:
                     last_data = json.load(f)
             except Exception:
                 pass
@@ -136,9 +131,8 @@ def main_3d():
             w_d, h_d, d_d = dims
 
             if lbl == "traffic light":
-                # Corp gri + led colorat
                 draw_styled_cube(rx, h_d/2, -rz, w_d, h_d/2, d_d, (0.35, 0.35, 0.35))
-                tc = o.get("tl_color", "")
+                tc  = o.get("tl_color", "")
                 led = (1,0,0) if tc=="ROSU" else (0,1,0) if tc=="VERDE" else (1,1,0) if tc=="GALBEN" else (0.3,0.3,0.3)
                 draw_styled_cube(rx, h_d + 0.2, -rz - 0.1, 0.2, 0.2, 0.2, led)
             else:
@@ -165,8 +159,10 @@ def main_3d():
         prev_brake = brake
 
         skid_offset   += skid_velocity
-        skid_velocity *= 0.65
-        skid_offset   *= 0.80
+        skid_velocity *= 0.50
+        skid_offset   *= 0.70
+        if abs(skid_velocity) < 0.001: skid_velocity = 0.0
+        if abs(skid_offset)   < 0.01:  skid_offset   = 0.0
 
         ego_col = (1.0,0.1,0.1) if brake=="strong" else (1.0,0.7,0.0) if brake=="light" else (0.0,1.0,0.4)
         draw_styled_cube(skid_offset, 0.4, 0, 1.1, 0.4, 2.2, ego_col)

@@ -1,5 +1,5 @@
 {
-    "timestamp": 1775367011.987,
+    "timestamp": 1775372189.701,
     "decisions": {
         "brake_decision": "none",
         "speed_decision": "increase",
@@ -7,17 +7,17 @@
         "lane_decision": "keep_lane"
     },
     "lane_geometry": {
-        "center_line": -517,
-        "right_line": 192
+        "center_line": -253,
+        "right_line": 56
     },
-    "objects": [
-        {
-            "label": "car",
-            "pos_rel": [
-                -4.08,
-                10.43
-            ],
-            "speed_kmh": 0.0
-        }
-    ]
+    "road_info": {
+        "road_surface": "asfalt_uscat",
+        "friction_mu": 0.7,
+        "grip_class": "A"
+    },
+    "fog_info": {
+        "visibility_m": 500,
+        "fog_condition": "vizibilitate_buna"
+    },
+    "objects": []
 }

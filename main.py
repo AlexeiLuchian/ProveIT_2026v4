@@ -1,6 +1,6 @@
 import cv2, time, json, os
-from perception import PerceptionSystem, LABEL_COLORS, LABEL_TAGS
-from logic import DrivingLogic
+from core.perception import PerceptionSystem, LABEL_COLORS, LABEL_TAGS
+from core.logic import DrivingLogic
 
 
 class DataBus:
@@ -22,7 +22,7 @@ bus = DataBus()
 def main():
     cap = cv2.VideoCapture("video_test.mp4")
     eye, brain = PerceptionSystem(), DrivingLogic()
-    last_save     = 0
+    last_save      = 0
     prev_positions = {}   # key → (rel_x, rel_z, timestamp)
     speed_history  = {}   # key → lista ultimelor N viteze (medie glisantă)
 
@@ -39,13 +39,13 @@ def main():
         frame = cv2.resize(frame, (1280, 720))
 
         current_time = time.time()
-        detections, lanes = eye.analyze(frame)
+        detections, lanes, road_info, fog_info = eye.analyze(frame)
         decisions = brain.update(detections)
 
         # Estimare viteză — urmărire prin proximitate spațială, nu index
         new_prev = {}
         for o in detections:
-            lbl  = o["label"]
+            lbl    = o["label"]
             ox, oz = o["pos_rel"]
 
             # Găsim cel mai apropiat obiect din frame-ul anterior cu același label
@@ -63,7 +63,7 @@ def main():
                 dt = current_time - pt
                 if dt > 0:
                     raw_kmh = ((pz - oz) / dt) * 3.6   # pozitiv = se apropie
-                    raw_kmh = max(-180.0, min(300.0, raw_kmh))  # clamp fizic
+                    raw_kmh = max(-180.0, min(300.0, raw_kmh))
 
                     hist = speed_history.setdefault(track_key, [])
                     hist.append(raw_kmh)
@@ -74,17 +74,15 @@ def main():
 
         prev_positions = new_prev
 
-        # ── HUD pe video ───────────────────────────────────────────────────
+        # ── HUD pe video ───────────────────────────────────────────────────────
         for d in detections:
             x1, y1, x2, y2 = d["box"]
             lbl = d["label"]
             rz  = d["pos_rel"][1]
 
-            # Culoare BGR din dicționarul central
             color = LABEL_COLORS.get(lbl, (255, 255, 255))
             tag   = LABEL_TAGS.get(lbl, lbl.upper())
 
-            # Semafoare: culoarea se schimbă după starea ledului
             if lbl == "traffic light":
                 tc = d.get("tl_color", "?")
                 tag = f"SEMAFOR [{tc}]"
@@ -104,7 +102,13 @@ def main():
         cv2.putText(frame, f"LANE:  {decisions['lane_decision'].upper()}",
                     (20, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (80, 180, 255), 2)
 
-        # ── Export JSON + Log la 0.5s ──────────────────────────────────────
+        # Suprafată drum + vizibilitate în colțul dreapta-sus
+        surf_text = f"DRUM: {road_info['road_surface'].upper()} (mu={road_info['friction_mu']})"
+        fog_text  = f"VIZ: {fog_info['visibility_m']}m [{fog_info['fog_condition'].upper()}]"
+        cv2.putText(frame, surf_text, (700, 40),  cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 255, 200), 2)
+        cv2.putText(frame, fog_text,  (700, 70),  cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 230, 255), 2)
+
+        # ── Export JSON + Log la 0.5s ──────────────────────────────────────────
         if current_time - last_save >= 0.5:
             clean_objects = []
             for o in detections:
@@ -117,10 +121,12 @@ def main():
                 clean_objects.append(obj_c)
 
             data_to_send = {
-                "timestamp":    round(current_time, 3),
-                "decisions":    decisions,
+                "timestamp":     round(current_time, 3),
+                "decisions":     decisions,
                 "lane_geometry": lanes,
-                "objects":      clean_objects,
+                "road_info":     road_info,
+                "fog_info":      fog_info,
+                "objects":       clean_objects,
             }
 
             with open("output/data.json", "w") as f:
@@ -137,7 +143,12 @@ def main():
                     f"BRAKE:{decisions['brake_decision']} | "
                     f"SPEED:{decisions['speed_decision']} | "
                     f"LANE:{decisions['lane_decision']} | "
-                    f"REASON:{reason}\n"
+                    f"REASON:{reason} | "
+                    f"ROAD:{road_info['road_surface']} | "
+                    f"MU:{road_info['friction_mu']} | "
+                    f"GRIP:{road_info['grip_class']} | "
+                    f"FOG:{fog_info['fog_condition']} | "
+                    f"VIZ:{fog_info['visibility_m']}m\n"
                 )
 
             last_save = current_time

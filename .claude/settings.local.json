@@ -8,7 +8,9 @@
       "Bash(python3 -c ':*)",
       "Bash(python3:*)",
       "Bash(wsl:*)",
-      "WebSearch"
+      "WebSearch",
+      "Read(//c/Users/alexei/repos/**)",
+      "Bash(mkdir -p core rendering)"
     ]
   }
 }
