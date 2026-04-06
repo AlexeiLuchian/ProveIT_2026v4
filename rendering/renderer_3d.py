@@ -143,6 +143,8 @@ def main_3d():
             brake_trails.append(skid_offset)
         if len(brake_trails) > 40:
             brake_trails.pop(0)
+        if brake != "strong":
+            brake_trails.clear()
 
         glColor3f(0.04, 0.04, 0.04)
         for i, sx in enumerate(brake_trails):
